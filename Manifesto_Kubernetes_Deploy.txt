@@ -1,0 +1,76 @@
+apiVersion: SwFeature/v1
+kind: Deployment
+metadata:
+  name: MySQL
+spec:
+  selector:
+    matchLabels:
+      app: MySQL
+  template:
+    metadata:
+      labels:
+        app: MySQL
+    spec: 
+      containers:
+        - name: MySQL
+          image: postgres:15.0
+          ports:
+          - containerPort: 3306
+          env:
+          - name: MySQL
+            value: "SwFeature"
+          - name: MySQL_USER
+            value: "SwFeature"
+          - name: MySQL_PASSWORD
+            value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: MySQL 
+spec: 
+  selector:
+    app: MySQL
+  ports:
+    - port: 3306
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec: 
+      containers:
+        - name: web
+          image: gusbernardo/SwFeature
+          ports:
+          - containerPort: 8080
+          env:
+          - name: DB_DATABASE
+            value: "SwFeature"
+          - name: DB_USERNAME
+            value: "SwFeature"
+          - name: DB_HOST
+            value: "MySQL"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 8080
+      type: LoadBalancer #-- rodar localhost:80 
